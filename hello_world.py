@@ -2,8 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:3012"}})  # Replace with your frontend's URL
-
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 @app.route('/api')
 def hello_world():
     return {'message': 'Hello, World!'}
