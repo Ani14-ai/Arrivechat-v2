@@ -3,12 +3,14 @@ import pyodbc
 from flask_cors import CORS
 import jwt
 import qrcode
+from PIL import Image, ImageDraw, ImageFont
 import io
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
-import secrets
+from datetime import timedelta
+
 secret_key = secrets.token_hex(32)
 
 app = Flask(__name__)
@@ -26,27 +28,55 @@ connection_string = (
     "Encrypt=yes;"
     "TrustServerCertificate=yes;"
 )
-@app.route('/api/customers', methods=['GET'])
-def get_customers():
+db_connection_string = (
+    "Driver={ODBC Driver 17 for SQL Server};"
+    "Server=103.145.51.250;"
+    "Database=ArriveChatAppDB;"
+    "UID=ArriveDBUsr;"
+    "PWD=Arrive@pas12;"
+    "Encrypt=yes;"
+    "TrustServerCertificate=yes;"
+)
+
+def is_email_verified(email):
     try:
-        connection = pyodbc.connect(connection_string)
+        connection = pyodbc.connect(db_connection_string)
         cursor = connection.cursor()
-        cursor.execute("SELECT * FROM customer")
-        columns = [column[0] for column in cursor.description]
-        customers = []
-        for row in cursor.fetchall():
-            customer = dict(zip(columns, row))
-            customers.append(customer)
-        cursor.close()
+        query = f"SELECT email FROM customers WHERE email = '{email}'"
+        cursor.execute(query)
+        result = cursor.fetchone()
         connection.close()
-        return jsonify(customers)
+
+        return result is not None
     except Exception as e:
-        return jsonify({'error': str(e)})
+        return False
+
+def get_checkout_date_from_database(email):
+    try:
+        connection = pyodbc.connect(db_connection_string)
+        cursor = connection.cursor()
+        query = f"SELECT departure_date FROM customers WHERE email = '{email}'"
+        cursor.execute(query)
+        result = cursor.fetchone()
+        connection.close()
+
+        if result:
+            return result[0]
+        else:
+            return None
+    except Exception as e:
+        return None
+
+def generate_jwt_token(email, checkout_date):
+    expiration_time = checkout_date + timedelta(days=1)  # Token expires 1 day after checkout
+    jwt_token = jwt.encode({'email': email, 'exp': expiration_time}, secret_key, algorithm='HS256')
+    return jwt_token
+
 def add_room_to_database(email, room_number):
     try:
         connection = pyodbc.connect(db_connection_string)
         cursor = connection.cursor()
-        query = f"INSERT INTO Room (Email, RoomNumber) VALUES ('{email}', {room_number})"
+        query = f"INSERT INTO customers (Email, RoomNumber) VALUES ('{email}', {room_number})"
         cursor.execute(query)
         connection.commit()
         connection.close()
@@ -54,7 +84,6 @@ def add_room_to_database(email, room_number):
         return True
     except Exception as e:
         return False, str(e)
-from email.mime.text import MIMEText
 
 def send_qr_email(receiver_email, qr_image):
     try:
@@ -83,17 +112,27 @@ def send_qr_email(receiver_email, qr_image):
             server.starttls()
             server.login(smtp_username, smtp_password)
             server.sendmail(sender_email, receiver_email, message.as_string())
+
         return True
     except Exception as e:
         return False, str(e)
-
 
 @app.route('/api/auth/send-qr', methods=['GET'])
 def send_qr():
     try:
         email = request.json.get('email')
-        jwt_token = jwt.encode({'email': email}, secret_key, algorithm='HS256')
+        if not is_email_verified(email):
+            return jsonify({'success': False, 'error': 'Email is not verified'})
+
+        checkout_date = get_checkout_date_from_database(email)
+
+        if checkout_date is None:
+            return jsonify({'success': False, 'error': 'Failed to retrieve checkout date from the database'})
+
+        jwt_token = generate_jwt_token(email, checkout_date)
         url = f"https://ae.arrive.waysdatalabs.com?token={jwt_token}"
+
+        # Generate QR code
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
@@ -117,17 +156,52 @@ def send_qr():
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
-    
+
 @app.route('/api/auth/verify-token', methods=['GET'])
 def verify_token():
     try:
         token = request.args.get('token')
         decoded_token = jwt.decode(token, secret_key, algorithms=['HS256'])
-        return jsonify({'success': True, 'message': 'Token is valid', 'decoded_token': decoded_token})
+        email = decoded_token.get('email')
+
+        # Check if the email is verified in the database
+        if is_email_verified(email):
+            return jsonify({'success': True, 'message': 'Token is valid', 'decoded_token': decoded_token})
+        else:
+            return jsonify({'success': False, 'error': 'Email is not verified'})
+
     except jwt.ExpiredSignatureError:
         return jsonify({'success': False, 'error': 'Token has expired'})
     except jwt.InvalidTokenError:
         return jsonify({'success': False, 'error': 'Invalid token'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=3012)
+@app.route('/api/customer/add-roomno', methods=['POST'])
+def add_room_number():
+    try:
+        authorization_header = request.headers.get('Authorization')
+        if not authorization_header or not authorization_header.startswith('Bearer '):
+            return jsonify({'success': False, 'error': 'Invalid Authorization header'})
+
+        jwt_token = authorization_header.split(' ')[1]
+        decoded_token = jwt.decode(jwt_token, secret_key, algorithms=['HS256'])
+
+        room_number = request.json.get('roomno')
+        email = decoded_token.get('email')
+        success = add_room_to_database(email, room_number)
+
+        if success:
+            return jsonify({'success': True, 'message': 'Room number added successfully', 'decoded_token': decoded_token})
+        else:
+            return jsonify({'success': False, 'error': 'Failed to add room number to the database'})
+
+    except jwt.ExpiredSignatureError:
+        return jsonify({'success': False, 'error': 'Token has expired'})
+    except jwt.InvalidTokenError:
+        return jsonify({'success': False, 'error': 'Invalid token'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+if __name__ == '__main__':
+    app.run(port=3012)
