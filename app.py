@@ -10,6 +10,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
 from datetime import timedelta
+import secrets
 
 secret_key = secrets.token_hex(32)
 
