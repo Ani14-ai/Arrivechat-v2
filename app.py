@@ -164,8 +164,6 @@ def verify_token():
         token = request.args.get('token')
         decoded_token = jwt.decode(token, secret_key, algorithms=['HS256'])
         email = decoded_token.get('email')
-
-        # Check if the email is verified in the database
         if is_email_verified(email):
             return jsonify({'success': True, 'message': 'Token is valid', 'decoded_token': decoded_token})
         else:
@@ -203,6 +201,60 @@ def add_room_number():
         return jsonify({'success': False, 'error': 'Invalid token'})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
+def add_customer_to_database(customer_data):
+    try:
+        connection = pyodbc.connect(db_connection_string)
+        cursor = connection.cursor()
+        arrival_date = datetime.strptime(customer_data['arrival_date'], '%Y-%m-%dT%H:%M:%S')
+        departure_date = datetime.strptime(customer_data['departure_date'], '%Y-%m-%dT%H:%M:%S')
+        
+        query = f"""
+            INSERT INTO customer (
+                name, email, phone_number, unique_id, arrival_date, departure_date, room_no, language
+            ) VALUES (
+                '{customer_data['name']}', '{customer_data['email']}', '{customer_data['phone_number']}', 
+                '{customer_data['unique_id']}', '{arrival_date}', '{departure_date}', 
+                '{customer_data['room_no']}', '{customer_data['language']}'
+            )
+        """
+        cursor.execute(query)
+        connection.commit()
+        connection.close()
 
+        return True
+    except Exception as e:
+        return False, str(e)
+@app.route('/api/customer', methods=['POST'])
+def add_customer():
+    try:
+        customer_data = request.json
+        success = add_customer_to_database(customer_data)
+
+        if not success:
+            return jsonify({'success': False, 'error': 'Failed to add customer to the database'})
+        jwt_token = jwt.encode({'email': customer_data['email']}, secret_key, algorithm='HS256')
+
+        # Generate QR code
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        url = f"https://ae.arrive.waysdatalabs.com?token={jwt_token}"
+        qr.add_data(url)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color=(153, 76, 0), back_color='white')
+        img_stream = io.BytesIO()
+        img.save(img_stream)
+        img_stream.seek(0)
+
+        # Send QR code via email
+        send_qr_email(customer_data['email'], img_stream)
+
+        return jsonify({'success': True, 'message': 'Customer added successfully and mail has been sent'})
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 if __name__ == '__main__':
     app.run(port=3012)
