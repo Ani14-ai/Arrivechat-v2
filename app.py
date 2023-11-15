@@ -209,9 +209,8 @@ def add_customer_to_database(customer_data):
         departure_date = datetime.strptime(customer_data['departure_date'], '%Y-%m-%dT%H:%M:%S')
         
         query = f"""
-            INSERT INTO customer (
-                name, email, phone_number, unique_id, arrival_date, departure_date, room_no, language
-            ) VALUES (
+            INSERT INTO customers (
+                name, email, phone_number, unique_id, arrival_date, departure_date) VALUES (
                 '{customer_data['name']}', '{customer_data['email']}', '{customer_data['phone_number']}', 
                 '{customer_data['unique_id']}', '{arrival_date}', '{departure_date}', 
                 '{customer_data['room_no']}', '{customer_data['language']}'
