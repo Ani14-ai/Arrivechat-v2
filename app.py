@@ -77,7 +77,12 @@ def add_room_to_database(email, room_number):
     try:
         connection = pyodbc.connect(db_connection_string)
         cursor = connection.cursor()
-        query = f"INSERT INTO customers (Email, RoomNumber) VALUES ('{email}', {room_number})"
+        query = f"""
+            UPDATE customer 
+            SET 
+                room_no = '{room_number}'
+            WHERE 
+                email = '{email}' """
         cursor.execute(query)
         connection.commit()
         connection.close()
@@ -210,14 +215,11 @@ def add_customer_to_database(customer_data):
             departure_date = parser.parse(customer_data['departure_date']).strftime('%Y-%m-%d %H:%M:%S')
         except ValueError as e:
             raise ValueError(f"Error parsing date strings: {e}")
-         query = f"""
+        query = f"""
             INSERT INTO customer (
-                name, email, phone_number, unique_id, arrival_date, departure_date, room_no, language
-            ) VALUES (
+                name, email, phone_number, unique_id, arrival_date, departure_date) VALUES (
                 '{customer_data['name']}', '{customer_data['email']}', {customer_data['phone_number']},
-                '{customer_data['unique_id']}', '{arrival_date}', '{departure_date}', {customer_data['room_no']}, '{customer_data['language']}'
-            )
-        """
+                '{customer_data['unique_id']}', '{arrival_date}', '{departure_date}')"""
         cursor.execute(query)
         connection.commit()
         connection.close()
