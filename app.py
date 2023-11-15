@@ -11,7 +11,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
 from datetime import timedelta
 import secrets
-
+from dateutil import parser
 secret_key = secrets.token_hex(32)
 
 app = Flask(__name__)
@@ -205,21 +205,22 @@ def add_customer_to_database(customer_data):
     try:
         connection = pyodbc.connect(db_connection_string)
         cursor = connection.cursor()
-        arrival_date = datetime.strptime(customer_data['arrival_date'], '%Y-%m-%dT%H:%M:%S')
-        departure_date = datetime.strptime(customer_data['departure_date'], '%Y-%m-%dT%H:%M:%S')
-        
+        try:
+            arrival_date = parser.parse(customer_data['arrival_date']).strftime('%Y-%m-%d %H:%M:%S')
+            departure_date = parser.parse(customer_data['departure_date']).strftime('%Y-%m-%d %H:%M:%S')
+        except ValueError as e:
+            raise ValueError(f"Error parsing date strings: {e}")
         query = f"""
             INSERT INTO customers (
-                name, email, phone_number, unique_id, arrival_date, departure_date) VALUES (
-                '{customer_data['name']}', '{customer_data['email']}', '{customer_data['phone_number']}', 
-                '{customer_data['unique_id']}', '{arrival_date}', '{departure_date}', 
-                '{customer_data['room_no']}', '{customer_data['language']}'
+                id, name, email, phone_number, unique_id, arrival_date, departure_date, room_no, language
+            ) VALUES (
+                {customer_data['id']}, '{customer_data['name']}', '{customer_data['email']}', {customer_data['phone_number']},
+                '{customer_data['unique_id']}', '{arrival_date}', '{departure_date}', {customer_data['room_no']}, '{customer_data['language']}'
             )
         """
         cursor.execute(query)
         connection.commit()
         connection.close()
-
         return True
     except Exception as e:
         return False, str(e)
