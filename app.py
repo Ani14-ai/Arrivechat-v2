@@ -78,7 +78,7 @@ def add_room_to_database(email, room_number):
         connection = pyodbc.connect(db_connection_string)
         cursor = connection.cursor()
         query = f"""
-            UPDATE customer 
+            UPDATE customers 
             SET 
                 room_no = '{room_number}'
             WHERE 
@@ -216,7 +216,7 @@ def add_customer_to_database(customer_data):
         except ValueError as e:
             raise ValueError(f"Error parsing date strings: {e}")
         query = f"""
-            INSERT INTO customer (
+            INSERT INTO customers (
                 name, email, phone_number, unique_id, arrival_date, departure_date) VALUES (
                 '{customer_data['name']}', '{customer_data['email']}', {customer_data['phone_number']},
                 '{customer_data['unique_id']}', '{arrival_date}', '{departure_date}')"""
