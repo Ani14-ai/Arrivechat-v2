@@ -212,12 +212,9 @@ def add_customer_to_database(customer_data):
             raise ValueError(f"Error parsing date strings: {e}")
         query = f"""
             INSERT INTO customers (
-                id, name, email, phone_number, unique_id, arrival_date, departure_date, room_no, language
-            ) VALUES (
+                id, name, email, phone_number, unique_id, arrival_date, departure_date) VALUES (
                 {customer_data['id']}, '{customer_data['name']}', '{customer_data['email']}', {customer_data['phone_number']},
-                '{customer_data['unique_id']}', '{arrival_date}', '{departure_date}', {customer_data['room_no']}, '{customer_data['language']}'
-            )
-        """
+                '{customer_data['unique_id']}', '{arrival_date}', '{departure_date}')"""
         cursor.execute(query)
         connection.commit()
         connection.close()
