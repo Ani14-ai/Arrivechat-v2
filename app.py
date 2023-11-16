@@ -258,5 +258,58 @@ def add_customer():
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
+def get_captain_email_from_database(email):
+    try:
+        connection = pyodbc.connect(db_connection_string)
+        cursor = connection.cursor()
+        query = f"SELECT email FROM Captain WHERE email = '{email}'"
+        cursor.execute(query)
+        result = cursor.fetchone()
+        connection.close()
+        return result[0] if result else None
+    except Exception as e:
+        return None
+
+def generate_captain_token(email):
+    try:
+        token = jwt.encode({'email': email}, secret_key, algorithm='HS256')
+        return token
+    except Exception as e:
+        return None
+
+def verify_captain_token(token):
+    try:
+        decoded_token = jwt.decode(token, secret_key, algorithms=['HS256'])
+        captain_email = decoded_token.get('email')
+        captain_email_db = get_captain_email_from_database(captain_email)
+        if captain_email_db and captain_email_db == captain_email:
+            return True
+        else:
+            return False
+    except jwt.ExpiredSignatureError:
+        return False
+    except jwt.InvalidTokenError:
+        return False
+    except Exception as e:
+        return False
+@app.route('/api/captain/auth/login', methods=['POST'])
+def captain_login():
+    try:
+        email = request.json.get('email')
+
+        if not email:
+            return jsonify({'success': False, 'error': 'Email not provided'})
+        captain_email_db = get_captain_email_from_database(email)
+        if not captain_email_db:
+            return jsonify({'success': False, 'error': 'Captain not found'})
+        token = generate_captain_token(email)
+        
+        if (verify_captain_token(token)):
+            return jsonify({'success': True, 'message': 'Captain logged in successfully'})
+        else:
+            return jsonify({'success': False, 'error': 'Failed to generate token'})
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 if __name__ == '__main__':
     app.run(port=3012)
