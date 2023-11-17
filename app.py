@@ -231,10 +231,13 @@ def add_customer():
     try:
         customer_data = request.json
         success = add_customer_to_database(customer_data)
-
+        email=request.json.get('email')
         if not success:
             return jsonify({'success': False, 'error': 'Failed to add customer to the database'})
-        jwt_token = jwt.encode({'email': customer_data['email']}, secret_key, algorithm='HS256')
+        checkout_date = get_checkout_date_from_database(email)
+        if checkout_date is None:
+            return jsonify({'success': False, 'error': 'Failed to retrieve checkout date from the database'})
+        jwt_token = generate_jwt_token(email, checkout_date)
 
         # Generate QR code
         qr = qrcode.QRCode(
@@ -271,47 +274,36 @@ def get_captain_email_from_database(employee_id, password):
     except Exception as e:
         return None
 
-
-def generate_captain_token(email):
+def generate_captain_token(employee_id):
     try:
-        token = jwt.encode({'email': email}, secret_key, algorithm='HS256')
+        token = jwt.encode({'emp_id': employee_id}, secret_key, algorithm='HS256')
         return token
     except Exception as e:
         return None
 
-def verify_captain_token(token):
-    try:
-        decoded_token = jwt.decode(token, secret_key, algorithms=['HS256'])
-        captain_email = decoded_token.get('email')
-        captain_email_db = get_captain_email_from_database(captain_email)
-        if captain_email_db and captain_email_db == captain_email:
-            return True
-        else:
-            return False
-    except jwt.ExpiredSignatureError:
-        return False
-    except jwt.InvalidTokenError:
-        return False
-    except Exception as e:
-        return False
 @app.route('/api/captain/auth/login', methods=['POST'])
 def captain_login():
     try:
-        email = request.json.get('email')
+        employee_id = request.json.get('employee_id')
+        password = request.json.get('password')
 
-        if not email:
-            return jsonify({'success': False, 'error': 'Email not provided'})
-        captain_email_db = get_captain_email_from_database(email)
+        if not employee_id or not password:
+            return jsonify({'success': False, 'error': 'Employee ID or password not provided'})
+
+        captain_email_db = get_captain_email_from_database(employee_id, password)
+
         if not captain_email_db:
             return jsonify({'success': False, 'error': 'Captain not found'})
-        token = generate_captain_token(email)
-        
-        if (verify_captain_token(token)):
-             return jsonify({'success': True, 'token': token,' message': 'Captain logged in successfully'})
+
+        token = generate_captain_token(employee_id)
+
+        if token:
+             return jsonify({'success': True, 'token': token, 'message': 'Captain logged in successfully'})
         else:
             return jsonify({'success': False, 'error': 'Failed to generate token'})
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
+
 if __name__ == '__main__':
     app.run(port=3012)
