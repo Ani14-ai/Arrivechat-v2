@@ -196,7 +196,7 @@ def add_room_number():
         success = add_room_to_database(email, room_number)
 
         if success:
-            return jsonify({'success': True, 'message': 'Room number added successfully', 'decoded_token': decoded_token})
+            return jsonify({'success': True, 'message': 'Room number added successfully'})
         else:
             return jsonify({'success': False, 'error': 'Failed to add room number to the database'})
 
@@ -258,17 +258,19 @@ def add_customer():
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
-def get_captain_email_from_database(email):
+def get_captain_email_from_database(employee_id, password):
     try:
         connection = pyodbc.connect(db_connection_string)
         cursor = connection.cursor()
-        query = f"SELECT email FROM Captain WHERE email = '{email}'"
+        query = f"SELECT email FROM Captain WHERE employee_id = '{employee_id}' AND password = '{password}'"
         cursor.execute(query)
         result = cursor.fetchone()
         connection.close()
+
         return result[0] if result else None
     except Exception as e:
         return None
+
 
 def generate_captain_token(email):
     try:
@@ -305,7 +307,7 @@ def captain_login():
         token = generate_captain_token(email)
         
         if (verify_captain_token(token)):
-            return jsonify({'success': True, 'message': 'Captain logged in successfully'})
+             return jsonify({'success': True, 'token': token,' message': 'Captain logged in successfully'})
         else:
             return jsonify({'success': False, 'error': 'Failed to generate token'})
 
