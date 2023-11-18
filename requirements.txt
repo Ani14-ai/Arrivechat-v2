@@ -27,3 +27,5 @@ werkzeug==2.3.7
 zipp==3.17.0
 PyJWT==2.2.0
 qrcode[pil]==7.3
+python-socketio==5.4.0
+eventlet==0.31.1
