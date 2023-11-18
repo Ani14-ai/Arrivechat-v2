@@ -372,8 +372,6 @@ def bot_chat(sid, data):
         conversation.append({'user': data['question'], 'bot': response})
         sio.emit('bot_response', {'conversation': conversation}, room=sid)
 
-if __name__ == '__main__':
-    app.run(port=3012)
-    socketio_server = socketio.WSGIServer(app, async_mode='eventlet', cors_allowed_origins='*')
-    socketio_server.serve_forever()
-
+if __name__ == "__main__":
+    import eventlet
+    eventlet.wsgi.server(eventlet.listen(("localhost", 5000)), app)
