@@ -1,10 +1,9 @@
 Flask==2.0.1
 Flask-Cors==3.0.10
-pyodbc==4.0.30
+pyodbc==5.0.1
 PyJWT==2.3.0
 qrcode==7.2
 Pillow==8.3.2
-smtplib==0.1.0
 python-dateutil==2.8.2
 python-socketio==5.4.0
 eventlet==0.31.1
