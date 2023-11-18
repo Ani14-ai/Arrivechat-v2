@@ -304,9 +304,6 @@ def captain_login():
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
-
-if __name__ == '__main__':
-    app.run(port=3012)
 import socketio
 import time
 
@@ -376,6 +373,7 @@ def bot_chat(sid, data):
         sio.emit('bot_response', {'conversation': conversation}, room=sid)
 
 if __name__ == '__main__':
+    app.run(port=3012)
     socketio_server = socketio.WSGIServer(app, async_mode='eventlet', cors_allowed_origins='*')
     socketio_server.serve_forever()
 
