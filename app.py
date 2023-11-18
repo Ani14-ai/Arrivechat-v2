@@ -12,9 +12,11 @@ from email.mime.image import MIMEImage
 from datetime import timedelta
 import secrets
 from dateutil import parser
+from flask_socketio import SocketIO
 secret_key = secrets.token_hex(32)
 
 app = Flask(__name__)
+socketio = SocketIO(app,port=3012)
 CORS(app, resources={"/api/*": {"origins": "*"}})
 @app.route('/api')
 def hello_world():
@@ -304,22 +306,9 @@ def captain_login():
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
-import socketio
-import time
 
-sio = socketio.Server(cors_allowed_origins='*')
-app = socketio.WSGIApp(sio)
-
-@sio.event
-def connect(sid, environ):
-    print(f"Client {sid} connected")
-
-@sio.event
-def disconnect(sid):
-    print(f"Client {sid} disconnected")
-
-@sio.event
-def bot_chat(sid, data):
+@socketio.on('bot_chat')
+def handle_bot_chat(data):
     questions = [
         "How can I book a room?",
         "What types of rooms do you offer?",
@@ -367,11 +356,10 @@ def bot_chat(sid, data):
     conversation = []
 
     for i, question in enumerate(questions):
-        time.sleep(1)
+        socketio.sleep(1)
         response = responses[i]
         conversation.append({'user': data['question'], 'bot': response})
-        sio.emit('bot_response', {'conversation': conversation}, room=sid)
+        socketio.emit('bot_chat', {'conversation': conversation})
 
-if __name__ == "__main__":
-    import eventlet
-    eventlet.wsgi.server(eventlet.listen(("localhost", 3012)), app)
+if __name__ == '__main__':
+    socketio.run(app, debug=False)
