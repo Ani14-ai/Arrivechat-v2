@@ -374,4 +374,4 @@ def bot_chat(sid, data):
 
 if __name__ == "__main__":
     import eventlet
-    eventlet.wsgi.server(eventlet.listen(("localhost", 5000)), app)
+    eventlet.wsgi.server(eventlet.listen(("localhost", 3012)), app)
