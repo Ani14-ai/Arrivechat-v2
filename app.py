@@ -16,7 +16,7 @@ from flask_socketio import SocketIO
 secret_key = secrets.token_hex(32)
 
 app = Flask(__name__)
-socketio = SocketIO(app,port=3012)
+socketio = SocketIO(app,port=3012,cors_allowed_origins="*")
 CORS(app, resources={"/api/*": {"origins": "*"}})
 @app.route('/api')
 def hello_world():
