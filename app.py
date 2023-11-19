@@ -309,57 +309,31 @@ def captain_login():
 
 @socketio.on('bot_chat')
 def handle_bot_chat(data):
-    questions = [
-        "How can I book a room?",
-        "What types of rooms do you offer?",
-        "What are the room rates?",
-        "Are there any discounts available?",
-        "Can I cancel my reservation?",
-        "Tell me about your check-in/check-out process.",
-        "What amenities do the rooms have?",
-        "Is breakfast included in the room rate?",
-        "Do you have a gym or fitness center?",
-        "Are pets allowed in the hotel?",
-        "How can I reach the hotel from the airport?",
-        "What's the Wi-Fi password?",
-        "Do you offer room service?",
-        "Is there parking available?",
-        "Tell me about nearby attractions.",
-        "Are there any restaurants nearby?",
-        "Can I request a late check-out?",
-        "What's your cancellation policy?",
-        "Do you have a pool?"
-    ]
-
-    responses = [
-        "To book a room, you can visit our official website or call our reservation hotline. Our user-friendly online booking system allows you to choose your preferred dates, room type, and any additional amenities you might need.",
-        "We offer a variety of room types to cater to different preferences. Our options include standard rooms, suites, and deluxe rooms. Each is designed to provide comfort and meet the diverse needs of our guests.",
-        "Room rates vary based on factors such as room type, view, and the dates of your stay. For the most accurate and up-to-date rates, we recommend checking our website or contacting our reservations team.",
-        "Yes, we offer various discounts for early bookings, loyalty members, and special promotions. For detailed information on current discounts, please check our website or get in touch with our reservations team.",
-        "Yes, you can cancel your reservation. Our cancellation policy allows for flexibility. You can manage your reservation by logging into your account on our website or by contacting our reservations team directly.",
-        "Check-in time is at 3:00 PM, and check-out time is at 11:00 AM. If you require early check-in or late check-out, please let us know in advance, and we'll do our best to accommodate your request.",
-        "Our rooms are equipped with modern amenities, including free Wi-Fi, TV, air conditioning, a minibar, and comfortable bedding. Feel free to contact our front desk for specific details or additional requests.",
-        "Yes, breakfast is included in the room rate. We offer a complimentary breakfast buffet for our guests, featuring a variety of delicious options to start your day.",
-        "Absolutely! We have a fully equipped gym and fitness center available for our guests. Maintain your workout routine during your stay with us.",
-        "Yes, we are a pet-friendly hotel. We understand that pets are part of the family, so feel free to inform us in advance if you plan to bring your furry friend along.",
-        "You can reach the hotel from the airport by taking a taxi, using our shuttle service, or using public transportation. For detailed directions and transportation options, please contact us.",
-        "The Wi-Fi password for our hotel is 'Arrive123'. Enjoy complimentary high-speed internet access during your stay.",
-        "Yes, we offer room service for your convenience. You can find the room service menu in your room, offering a selection of delicious meals and snacks.",
-        "Yes, we have parking available for our guests. Please note that there may be a fee depending on the type of parking.",
-        "Nearby attractions include parks, museums, and shopping centers. Our front desk can provide personalized recommendations based on your interests and preferences.",
-        "There are several restaurants within walking distance of the hotel, offering a variety of cuisines. Explore the local dining scene for a delightful culinary experience.",
-        "Late check-out requests are subject to availability. Please contact our front desk on the day of your departure to inquire about the possibility of a late check-out.",
-        "Our cancellation policy varies depending on the type of reservation. For specific details, please refer to your confirmation email or contact our reservations team.",
-        "Yes, we have a swimming pool available for our guests to enjoy. Relax and unwind by taking a refreshing dip in our inviting pool area."
-    ]
-
-    conversation = []
-
-    for i, question in enumerate(questions):
+   conversation_pairs = [
+    {"user": "How can I book a room?", "bot": "To book a room, you can visit our official website or call our reservation hotline. Our user-friendly online booking system allows you to choose your preferred dates, room type, and any additional amenities you might need."},
+    {"user": "What types of rooms do you offer?", "bot": "We offer a variety of room types to cater to different preferences. Our options include standard rooms, suites, and deluxe rooms. Each is designed to provide comfort and meet the diverse needs of our guests."},
+    {"user": "What are the room rates?", "bot": "Room rates vary based on factors such as room type, view, and the dates of your stay. For the most accurate and up-to-date rates, we recommend checking our website or contacting our reservations team."},
+    {"user": "Are there any discounts available?", "bot": "Yes, we offer various discounts for early bookings, loyalty members, and special promotions. For detailed information on current discounts, please check our website or get in touch with our reservations team."},
+    {"user": "Can I cancel my reservation?", "bot": "Yes, you can cancel your reservation. Our cancellation policy allows for flexibility. You can manage your reservation by logging into your account on our website or by contacting our reservations team directly."},
+    {"user": "Tell me about your check-in/check-out process.", "bot": "Check-in time is at 3:00 PM, and check-out time is at 11:00 AM. If you require early check-in or late check-out, please let us know in advance, and we'll do our best to accommodate your request."},
+    {"user": "What amenities do the rooms have?", "bot": "Our rooms are equipped with modern amenities, including free Wi-Fi, TV, air conditioning, a minibar, and comfortable bedding. Feel free to contact our front desk for specific details or additional requests."},
+    {"user": "Is breakfast included in the room rate?", "bot": "Yes, breakfast is included in the room rate. We offer a complimentary breakfast buffet for our guests, featuring a variety of delicious options to start your day."},
+    {"user": "Do you have a gym or fitness center?", "bot": "Absolutely! We have a fully equipped gym and fitness center available for our guests. Maintain your workout routine during your stay with us."},
+    {"user": "Are pets allowed in the hotel?", "bot": "Yes, we are a pet-friendly hotel. We understand that pets are part of the family, so feel free to inform us in advance if you plan to bring your furry friend along."},
+    {"user": "How can I reach the hotel from the airport?", "bot": "You can reach the hotel from the airport by taking a taxi, using our shuttle service, or using public transportation. For detailed directions and transportation options, please contact us."},
+    {"user": "What's the Wi-Fi password?", "bot": "The Wi-Fi password for our hotel is 'Arrive123'. Enjoy complimentary high-speed internet access during your stay."},
+    {"user": "Do you offer room service?", "bot": "Yes, we offer room service for your convenience. You can find the room service menu in your room, offering a selection of delicious meals and snacks."},
+    {"user": "Is there parking available?", "bot": "Yes, we have parking available for our guests. Please note that there may be a fee depending on the type of parking."},
+    {"user": "Tell me about nearby attractions.", "bot": "Nearby attractions include parks, museums, and shopping centers. Our front desk can provide personalized recommendations based on your interests and preferences."},
+    {"user": "Are there any restaurants nearby?", "bot": "There are several restaurants within walking distance of the hotel, offering a variety of cuisines. Explore the local dining scene for a delightful culinary experience."},
+    {"user": "Can I request a late check-out?", "bot": "Late check-out requests are subject to availability. Please contact our front desk on the day of your departure to inquire about the possibility of a late check-out."},
+    {"user": "What's your cancellation policy?", "bot": "Our cancellation policy varies depending on the type of reservation. For specific details, please refer to your confirmation email or contact our reservations team."},
+    {"user": "Do you have a pool?", "bot": "Yes, we have a swimming pool available for our guests to enjoy. Relax and unwind by taking a refreshing dip in our inviting pool area."}
+]
+   conversation = []
+   for pair in conversation_pairs:
         socketio.sleep(1)
-        response = responses[i]
-        conversation.append({'user': data['question'], 'bot': response})
+        conversation.append(pair)
         socketio.emit('bot_chat', {'conversation': conversation})
-
 if __name__ == '__main__':
     socketio.run(app, debug=False)
