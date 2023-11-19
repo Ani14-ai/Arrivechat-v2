@@ -10,6 +10,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
 from datetime import timedelta
+from datetime import datetime
 from dateutil import parser
 from flask_socketio import SocketIO
 import os
@@ -166,16 +167,47 @@ def send_qr():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
+def get_user_info_from_database(email):
+    try:
+        connection = pyodbc.connect(db_connection_string)
+        cursor = connection.cursor()
+        query = f"SELECT room_no, language, arrival_date, departure_date FROM customers WHERE email = '{email}'"
+        cursor.execute(query)
+        result = cursor.fetchone()
+        connection.close()
+
+        if result:
+            room_number, language, arrival_date, departure_date = result
+            return room_number, language, arrival_date, departure_date
+        else:
+            return None, None, None, None
+    except Exception as e:
+        return None, None, None, None
+
 @app.route('/api/auth/verify-token', methods=['GET'])
 def verify_token():
     try:
         token = request.args.get('token')
         decoded_token = jwt.decode(token, secret_key, algorithms=['HS256'])
         email = decoded_token.get('email')
-        if is_email_verified(email):
-            return jsonify({'success': True, 'message': 'Token is valid', 'decoded_token': decoded_token})
-        else:
+        if not is_email_verified(email):
             return jsonify({'success': False, 'error': 'Email is not verified'})
+        room_number, language, arrival_date, departure_date = get_user_info_from_database(email)
+        if arrival_date and departure_date:
+            num_days_stayed = (departure_date - arrival_date).days
+        else:
+            num_days_stayed = None
+
+        response_data = {
+            'success': True,
+            'message': 'Token is valid',
+            'decoded_token': decoded_token,
+            'room_number': room_number,
+            'language': language,
+            'num_days_stayed': num_days_stayed
+        }
+
+        return jsonify(response_data)
 
     except jwt.ExpiredSignatureError:
         return jsonify({'success': False, 'error': 'Token has expired'})
@@ -183,7 +215,6 @@ def verify_token():
         return jsonify({'success': False, 'error': 'Invalid token'})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
-
 @app.route('/api/customer/add-roomno', methods=['POST'])
 def update_language_in_database(email,language):
     try:
