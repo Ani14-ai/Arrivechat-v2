@@ -10,11 +10,12 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
 from datetime import timedelta
-import secrets
 from dateutil import parser
 from flask_socketio import SocketIO
-secret_key = secrets.token_hex(32)
-
+import os
+from dotenv import load_dotenv
+load_dotenv()
+secret_key = os.getenv("SECRET_KEY")
 app = Flask(__name__)
 socketio = SocketIO(app,port=3012,cors_allowed_origins="*")
 CORS(app, resources={"/api/*": {"origins": "*"}})
