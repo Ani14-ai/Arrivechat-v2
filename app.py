@@ -307,9 +307,7 @@ def captain_login():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
-@socketio.on('bot_chat')
-def handle_bot_chat(data):
-   conversation_pairs = [
+conversation_pairs = [
     {"user": "How can I book a room?", "bot": "To book a room, you can visit our official website or call our reservation hotline. Our user-friendly online booking system allows you to choose your preferred dates, room type, and any additional amenities you might need."},
     {"user": "What types of rooms do you offer?", "bot": "We offer a variety of room types to cater to different preferences. Our options include standard rooms, suites, and deluxe rooms. Each is designed to provide comfort and meet the diverse needs of our guests."},
     {"user": "What are the room rates?", "bot": "Room rates vary based on factors such as room type, view, and the dates of your stay. For the most accurate and up-to-date rates, we recommend checking our website or contacting our reservations team."},
@@ -330,10 +328,25 @@ def handle_bot_chat(data):
     {"user": "What's your cancellation policy?", "bot": "Our cancellation policy varies depending on the type of reservation. For specific details, please refer to your confirmation email or contact our reservations team."},
     {"user": "Do you have a pool?", "bot": "Yes, we have a swimming pool available for our guests to enjoy. Relax and unwind by taking a refreshing dip in our inviting pool area."}
 ]
-   conversation = []
-   for pair in conversation_pairs:
-        socketio.sleep(1)
-        conversation.append(pair)
-        socketio.emit('bot_chat', {'conversation': conversation})
+
+
+@socketio.on('connect')
+def handle_connect():
+    print('Client connected')
+    socketio.emit('bot_chat', {'conversation': [{'user': 'System', 'bot': 'Welcome! How can I assist you today?'}]})
+
+@socketio.on('bot_chat')
+def handle_bot_chat(data):
+    user_input = data['data']
+    response = get_response(user_input)
+    conversation = [{'user': user_input, 'bot': response}]
+    socketio.emit('bot_chat', {'conversation': conversation})
+
+def get_response(user_input):
+    for pair in conversation_pairs:
+        if user_input.lower() in pair['user'].lower():
+            return pair['bot']
+    return "I'm sorry, I didn't understand your question. Please ask something else."
+
 if __name__ == '__main__':
-    socketio.run(app, debug=False)
+    socketio.run(app)
