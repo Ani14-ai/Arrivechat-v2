@@ -185,6 +185,43 @@ def verify_token():
         return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/api/customer/add-roomno', methods=['POST'])
+def update_language_in_database(email,language):
+    try:
+        connection = pyodbc.connect(db_connection_string)
+        cursor = connection.cursor()
+        query = f"""
+            UPDATE language
+            SET language = '{language}'
+            email = '{email}' """
+        cursor.execute(query)
+        connection.commit()
+        connection.close()
+
+        return True
+    except Exception as e:
+        return False, str(e)
+@app.route('/api/language', methods=['POST'])
+def api_update_language():
+    try:
+       authorization_header = request.headers.get('Authorization')
+       if not authorization_header or not authorization_header.startswith('Bearer '):
+            return jsonify({'success': False, 'error': 'Invalid Authorization header'})
+
+       jwt_token = authorization_header.split(' ')[1]
+       decoded_token = jwt.decode(jwt_token, secret_key, algorithms=['HS256'])
+
+       language = request.json.get('language')
+       email = decoded_token.get('email')
+       success = update_language_in_database(email, language)
+
+       if not success:
+            return jsonify({'success': False, 'error': 'Failed to update language in the database'})
+
+       return jsonify({'success': True, 'message': 'Language updated successfully'})
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
 def add_room_number():
     try:
         authorization_header = request.headers.get('Authorization')
