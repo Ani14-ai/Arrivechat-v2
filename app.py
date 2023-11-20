@@ -375,6 +375,25 @@ def captain_login():
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
+        
+@app.route('/get-services-by-room/<int:roomno>', methods=['GET'])
+def get_services_by_room(roomno):
+    try:
+        connection = pyodbc.connect(db_connection_string)
+        cursor = connection.cursor()
+        query = f"SELECT service FROM services WHERE room = {roomno}"
+        cursor.execute(query)
+
+        result = cursor.fetchall()
+        connection.close()
+
+        services = [row.service for row in result]
+
+        return jsonify({'success': True, 'services': services})
+
+    except Exception as e:
+        print(e)
+        return jsonify({'success': False, 'error': 'Internal Server Error'}),500
 
 responses = {
     "How can I book a room?": "To book a room, you can visit our official website or call our reservation hotline. Our user-friendly online booking system allows you to choose your preferred dates, room type, and any additional amenities you might need.",
