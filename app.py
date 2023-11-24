@@ -15,7 +15,19 @@ from dateutil import parser
 from flask_socketio import SocketIO
 import os
 from dotenv import load_dotenv
-
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+from translate import Translator
+from openai import OpenAI
+import pyodbc
+app = Flask(__name__)
+nltk.download('punkt')
+nltk.download('stopwords')
+from openai import OpenAI
+client = OpenAI(api_key='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')
 load_dotenv()
 secret_key = os.getenv("SECRET_KEY")
 app = Flask(__name__)
@@ -513,6 +525,137 @@ def handle_bot_chat(data):
     conversation = [{"user": user_input, "bot": response}]
     socketio.emit("bot_chat", {"conversation": conversation})
 
+def get_lang(email):
+    try:
+        connection = pyodbc.connect(db_connection_string)
+        cursor = connection.cursor()
+        query = f"SELECT  Language FROM customers WHERE email = '{email}'"
+        cursor.execute(query)
+        result = cursor.fetchone()
+        connection.close()
+
+        if result:
+            language=result
+            return language
+        else:
+            return None
+    except Exception as e:
+        return None
+@app.route('/chat', methods=['POST'])
+def chat():
+    email = request.json.get('email')
+    source_language= 'en'
+    dest_language='en'
+    def preprocess_text(text):
+        tokens = word_tokenize(text.lower())
+        stop_words = set(stopwords.words('english'))
+        tokens = [word for word in tokens if word.isalnum() and word not in stop_words]
+        porter = PorterStemmer()
+        tokens = [porter.stem(word) for word in tokens]
+        return ' '.join(tokens)
+
+    def query_gpt4_api(question, dest_language='en'):
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo-1106",
+            response_format={"type": "text"},
+            max_tokens=50,
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant called arrivechat. Your job is to help tourists by giving to-the-point answers in one or two lines. You only answer questions related to a place."},
+                {"role": "user", "content": question}
+            ]
+        )
+        return translate_text(response.choices[0].message.content, dest=dest_language)
+
+    def translate_text(text, dest=dest_language, src=source_language):
+        translator = Translator(to_lang=dest, from_lang=src)
+        translated_text = translator.translate(text)
+        return translated_text
+
+    def translat_text(text, dest=dest_language,src=source_language):
+        translator = Translator(to_lang=dest,from_lang='en')
+        translated_text = translator.translate(text)
+        return translated_text
+
+    def create_hotel_chatbot():
+        hotel_questions = [
+            "How can I book a room?",
+            "What types of rooms do you offer?",
+            "What are the room rates?",
+            "Are there any discounts available?",
+            "Can I cancel my reservation?",
+            "Tell me about your check-in/check-out process.",
+            "What amenities do the rooms have?",
+            "Is breakfast included in the room rate?",
+            "Do you have a gym or fitness center?",
+            "Are pets allowed in the hotel?",
+            "How can I reach the hotel from the airport?",
+            "What's the Wi-Fi password?",
+            "Do you offer room service?",
+            "Is there parking available?",
+            "Tell me about nearby attractions.",
+            "Are there any restaurants nearby?",
+            "Can I request a late check-out?",
+            "What's your cancellation policy?",
+            "Do you have a pool?"
+        ]
+        hotel_answers = [
+            "To book a room, you can visit our official website or call our dedicated reservation hotline at +1-800-123-4567. Our friendly staff will assist you in securing your reservation. Our online booking system is also available.",
+            "We offer a variety of room types, including standard rooms, suites, and deluxe rooms.",
+            "Room rates vary based on factors such as room type, view, and dates. Check our website or contact reservations for accurate rates.",
+            "Yes, we offer various discounts for early bookings, loyalty members, and special promotions.",
+            "Yes, you can cancel your reservation. Check our cancellation policy for details.",
+            "Check-in is at 3:00 PM, and check-out is at 11:00 AM. Early check-in or late check-out may be available upon request.",
+            "Our rooms are equipped with modern amenities, including free Wi-Fi, TV, air conditioning, minibar, and comfortable bedding.",
+            "Yes, breakfast is included in the room rate. We offer a complimentary breakfast buffet.",
+            "Certainly! We have a fully equipped gym and fitness center for our guests.",
+            "Yes, we are a pet-friendly hotel. Please inform us in advance if you plan to bring your pet.",
+            "You can reach the hotel by taking a taxi, using our shuttle service, or using public transportation. Contact us for directions.",
+            "The Wi-Fi password for our hotel is 'HotelWiFi123'.",
+            "Yes, we offer room service. Explore our room service menu for a selection of meals and snacks.",
+            "Yes, we have parking available for guests. Note that fees may apply.",
+            "Nearby attractions include parks, museums, and shopping centers. Our front desk can provide recommendations.",
+            "There are several restaurants within walking distance, offering a variety of cuisines.",
+            "Late check-out is subject to availability. Please inquire at the front desk on your departure day.",
+            "Our cancellation policy varies. Refer to your confirmation email or contact reservations for details.",
+            "NO, we dont have a swimming pool available for guests to enjoy."
+        ]
+        question_db = [preprocess_text(question) for question in hotel_questions]
+        answer_db = hotel_answers
+        def hotel_chatbot(user_input):
+            nonlocal question_db, answer_db
+            if dest_language.lower() != 'en':
+                user_input_translated = translate_text(user_input, dest='en',src=source_language)
+            else:
+                user_input_translated = user_input
+
+            user_input_processed = preprocess_text(user_input_translated)
+            question_db.append(user_input_processed)
+
+            vectorizer = TfidfVectorizer()
+            question_vectors = vectorizer.fit_transform(question_db)
+            cosine_similarities = cosine_similarity(question_vectors[-1], question_vectors[:-1]).flatten()
+            most_similar_index = cosine_similarities.argmax()
+            similarity_threshold = 0.5
+
+            if cosine_similarities[most_similar_index] < similarity_threshold:
+                response = query_gpt4_api(user_input_translated, dest_language=dest_language)
+            else:
+                response = answer_db[most_similar_index]
+
+                if "timings" in user_input_processed:
+                    response += "\nFor specific timings, please visit our service section and chat with the hotel captain."
+            if dest_language.lower() != 'en':
+                response = translat_text(response, dest=dest_language, src=source_language)
+
+            return response
+
+        return hotel_chatbot
+    hotel_chatbot_model = create_hotel_chatbot()
+    data = request.get_json()
+    user_input = data['user_input']
+    response = hotel_chatbot_model(user_input)
+
+    return jsonify({'response': response})
 
 if __name__ == "__main__":
     socketio.run(app)
