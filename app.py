@@ -24,6 +24,8 @@ from translate import Translator
 from openai import OpenAI
 import pyodbc
 import nltk
+import langdetect
+from langdetect import detect
 app = Flask(__name__)
 nltk.download('punkt')
 nltk.download('stopwords')
@@ -542,7 +544,34 @@ def get_lang(email):
             return None
     except Exception as e:
         return None
-@app.route('/chat', methods=['POST'])
+        
+@app.route('/api/translate', methods=['POST'])
+def translate_text():
+    try:
+        data = request.get_json()
+        text_to_translate = data['text']
+        src_language = detect(text_to_translate)
+        dest_language = data['to']
+
+        translated_text = translate_text_api(text_to_translate, dest_language, src_language)
+        response = {"translated_text": translated_text}
+
+        return jsonify(response)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+def translate_text_api(text, dest='en', src='auto'):
+    if src == 'auto':
+        src_language = detect(text)
+    else:
+        src_language = src
+
+    translator = Translator(to_lang=dest, from_lang=src_language)
+    translated_text = translator.translate(text)
+    return translated_text
+    
+@app.route('/api/chat', methods=['POST'])
 def chat():
     email = request.json.get('email')
     source_language= 'en'
