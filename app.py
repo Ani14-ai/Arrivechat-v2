@@ -265,7 +265,7 @@ def update_language_in_database(email, language):
         connection = pyodbc.connect(db_connection_string)
         cursor = connection.cursor()
         query = f"""
-            UPDATE language
+            UPDATE customers
             SET language = '{language}'
             email = '{email}' """
         cursor.execute(query)
