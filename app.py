@@ -267,7 +267,7 @@ def update_language_in_database(email, language):
         query = f"""
             UPDATE customers
             SET language = '{language}'
-            email = '{email}' """
+            WHERE email = '{email}' """
         cursor.execute(query)
         connection.commit()
         connection.close()
