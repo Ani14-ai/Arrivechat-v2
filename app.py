@@ -641,7 +641,7 @@ def chat():
         "What is the cancellation policy of Aloft Palm Jumeirah?"
         ]
         hotel_answers = [
-      "Ofcourse!, I am talking about Aloft Palm Jumeriah"
+      "Ofcourse!, I am talking about Aloft Palm Jumeriah",
       "Aloft Palm Jumeirah is located on Crescent Road, offering a unique lifestyle experience that combines style, comfort, leisure, and fine dining. It is one of the most affordable hotels in Palm Jumeirah.",
       "Nearby attractions include Waldorf Astoria (4 minutes away), Atlantis, The Palm (6 minutes away), Al Sufouh 2 (20 minutes away), Dubai Marina (22 minutes away), Al Barsha Heights (23 minutes away), and Dubai Harbour (23 minutes away).",
       "The rooms are spacious, fully equipped, and beautifully designed, with bright and beach-vibe colors capturing Palm Jumeirah’s essence. Prices vary, such as 1-king bedroom at 250 AED, 2-twin beds at 259 AED, and others. Prices are subject to change based on factors like seasons and add-ons.",
