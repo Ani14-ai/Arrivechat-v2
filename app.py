@@ -124,33 +124,94 @@ def add_room_to_database(email, room_number):
         return False, str(e)
 
 
-def send_qr_email(receiver_email, qr_image):
+
+def send_qr_email(customer_data, jwt_token, img_with_link):
     try:
         sender_email = "dev@waysaheadglobal.com"
         smtp_server = "smtp.office365.com"
         smtp_port = 587
         smtp_username = "dev@waysaheadglobal.com"
         smtp_password = "Singapore@2022"
-        message = MIMEMultipart()
-        message["From"] = sender_email
-        message["To"] = receiver_email
-        message["Subject"] = "QR Code for Authentication"
-        html_body = f"""
+
+        # Create the MIME object
+        msg = MIMEMultipart()
+        msg['Subject'] = "Arrive Chat QR Code"
+        msg['From'] = sender_email
+        msg['To'] = customer_data["email"]
+
+        # Attach HTML content to the email
+        html_content = f"""
         <html>
-            <body>
-                <p>Please scan the QR code below for authentication:</p>
-                <img src="cid:qr_code" alt="QR Code">
-            </body>
-        </html>
-        """
-        message.attach(MIMEText(html_body, "html"))
-        image_attachment = MIMEImage(qr_image.read())
+    <head>
+        <style>
+            body {{
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                text-align: center;
+                background-color: #f5f5f5;
+                margin: 0;
+                padding: 0;
+            }}
+            .container {{
+                max-width: 400px;
+                margin: auto;
+                background-color: #ffffff;
+                border-radius: 4px;
+                overflow: hidden;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }}
+            .logo-container {{
+                background-color: #8b4513; /* Brown color */
+                padding: 3px;
+                text-align: center;
+            }}
+            .logo-container img {{
+                max-width: 80%;
+                height: auto;
+                margin-bottom: 20px;
+            }}
+            .qr-code {{
+                display: inline-block;
+                margin-top: 20px;
+            }}
+            p {{
+                margin: 10px 0;
+            }}
+            qr-code a {{
+                display: block; /* Make the anchor tag a block element to cover the entire QR code */
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="logo-container">
+                <img src="https://ae.arrive.waysdatalabs.com/_next/image?url=%2Fimg%2Farrivechat.png&w=256&q=75" alt="Arrive Chat Logo">
+            </div>
+            <p>Thank You for Booking with us!</p>
+            <p>Please scan the provided QR for any kind of queries</p>
+            <div class="qr-code">
+                <a href="https://ae.arrive.waysdatalabs.com?token={jwt_token}" target="_blank">                    
+                    <img src="cid:qr_code" alt="QR Code">
+                </a>
+            </div>
+            <p>Customer Name: {customer_data["name"]}</p>
+            <p>Email: {customer_data["email"]}</p>
+            <p>Mobile no.: {customer_data["mobile"]}</p>
+            <p>Hotel name: Aloft Palm Jumeirah</p>
+            <p>Hotel Address: East Crescent, The Palm Jumeirah, Dubai United Arab Emirates</p>
+        </div>
+    </body>
+</html>"""
+    
+        msg.attach(MIMEText(html_content, "html"))      
+        image_attachment = MIMEImage(img_with_link.read())
         image_attachment.add_header("Content-ID", "<qr_code>")
-        message.attach(image_attachment)
+        msg.attach(image_attachment)
+
+        # Connect to the server and send the email
         with smtplib.SMTP(smtp_server, smtp_port) as server:
             server.starttls()
             server.login(smtp_username, smtp_password)
-            server.sendmail(sender_email, receiver_email, message.as_string())
+            server.sendmail(sender_email, customer_data["email"], msg.as_string())
 
         return True
     except Exception as e:
@@ -365,44 +426,27 @@ def add_customer():
         success = add_customer_to_database(customer_data)
         email = request.json.get("email")
         if not success:
-            return jsonify(
-                {"success": False, "error": "Failed to add customer to the database"}
-            )
+            return jsonify({"success": False, "error": "Failed to add customer to the database"})
+
         checkout_date = get_checkout_date_from_database(email)
         if checkout_date is None:
-            return jsonify(
-                {
-                    "success": False,
-                    "error": "Failed to retrieve checkout date from the database",
-                }
-            )
+            return jsonify({"success": False, "error": "Failed to retrieve checkout date from the database"})
         jwt_token = generate_jwt_token(email, checkout_date)
-
-        # Generate QR code
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
-            box_size=10,
+            box_size=4,  
             border=4,
         )
         url = f"https://ae.arrive.waysdatalabs.com?token={jwt_token}"
         qr.add_data(url)
         qr.make(fit=True)
         img = qr.make_image(fill_color=(153, 76, 0), back_color="white")
-        img_stream = io.BytesIO()
-        img.save(img_stream)
-        img_stream.seek(0)
-
-        # Send QR code via email
-        send_qr_email(customer_data["email"], img_stream)
-
-        return jsonify(
-            {
-                "success": True,
-                "message": "Customer added successfully and mail has been sent",
-            }
-        )
-
+        img_buffer = io.BytesIO()
+        img.save(img_buffer)
+        img_buffer.seek(0)
+        send_qr_email(customer_data, jwt_token, img_buffer)
+        return jsonify({"success": True, "message": "Customer added successfully, and the mail has been sent"})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
