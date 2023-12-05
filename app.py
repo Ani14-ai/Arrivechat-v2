@@ -132,8 +132,6 @@ def send_qr_email(customer_data, jwt_token, img_with_link):
         smtp_port = 587
         smtp_username = "dev@waysaheadglobal.com"
         smtp_password = "Singapore@2022"
-
-        # Create the MIME object
         msg = MIMEMultipart()
         msg['Subject'] = "Arrive Chat QR Code"
         msg['From'] = sender_email
@@ -195,7 +193,7 @@ def send_qr_email(customer_data, jwt_token, img_with_link):
             </div>
             <p>Customer Name: {customer_data["name"]}</p>
             <p>Email: {customer_data["email"]}</p>
-            <p>Mobile no.: {customer_data["mobile"]}</p>
+            <p>Mobile no.: {customer_data["phone_number"]}</p>
             <p>Hotel name: Aloft Palm Jumeirah</p>
             <p>Hotel Address: East Crescent, The Palm Jumeirah, Dubai United Arab Emirates</p>
         </div>
@@ -206,8 +204,6 @@ def send_qr_email(customer_data, jwt_token, img_with_link):
         image_attachment = MIMEImage(img_with_link.read())
         image_attachment.add_header("Content-ID", "<qr_code>")
         msg.attach(image_attachment)
-
-        # Connect to the server and send the email
         with smtplib.SMTP(smtp_server, smtp_port) as server:
             server.starttls()
             server.login(smtp_username, smtp_password)
