@@ -139,7 +139,7 @@ def send_qr_email(customer_data, jwt_token, img_with_link):
 
         # Attach HTML content to the email
         html_content = f"""
-        <html>
+       <html>
     <head>
         <style>
             body {{
@@ -153,12 +153,13 @@ def send_qr_email(customer_data, jwt_token, img_with_link):
                 max-width: 400px;
                 margin: auto;
                 background-color: #ffffff;
-                border-radius: 4px;
+                border-radius: 5px;
                 overflow: hidden;
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                border: 1px solid #ddd;
             }}
             .logo-container {{
-                background-color: #8b4513; /* Brown color */
+                background-color: #8b4513;
                 padding: 3px;
                 text-align: center;
             }}
@@ -168,14 +169,24 @@ def send_qr_email(customer_data, jwt_token, img_with_link):
                 margin-bottom: 20px;
             }}
             .qr-code {{
-                display: inline-block;
-                margin-top: 20px;
+               display: flex;
+               justify-content: center;
+               align-items: center;
+               flex-direction: column;
+               margin-top: 20px;
+               margin-right: 1cm;
             }}
             p {{
                 margin: 10px 0;
             }}
-            qr-code a {{
-                display: block; /* Make the anchor tag a block element to cover the entire QR code */
+           
+            .assistant-message {{
+                font-style: italic;
+            }}
+            .ps-line {{
+                font-style: italic;
+                color: #808080; 
+                margin-top: 10px;
             }}
         </style>
     </head>
@@ -185,7 +196,7 @@ def send_qr_email(customer_data, jwt_token, img_with_link):
                 <img src="https://ae.arrive.waysdatalabs.com/_next/image?url=%2Fimg%2Farrivechat.png&w=256&q=75" alt="Arrive Chat Logo">
             </div>
             <p>Thank You for Booking with us!</p>
-            <p>Please scan the provided QR for any kind of queries</p>
+            <p>Hello from Arrivechat! I am your AI assistant and I am here to resolve all of your queries. Please scan the QR below or simply tap on it to activate your Arrivechat buddy.</p>
             <div class="qr-code">
                 <a href="https://ae.arrive.waysdatalabs.com?token={jwt_token}" target="_blank">                    
                     <img src="cid:qr_code" alt="QR Code">
@@ -196,9 +207,10 @@ def send_qr_email(customer_data, jwt_token, img_with_link):
             <p>Mobile no.: {customer_data["phone_number"]}</p>
             <p>Hotel name: Aloft Palm Jumeirah</p>
             <p>Hotel Address: East Crescent, The Palm Jumeirah, Dubai United Arab Emirates</p>
-        </div>
-    </body>
-</html>"""
+            <p class="ps-line">P.S.- This is a system-generated email; please do not reply.</p>
+         </div>
+        </body>
+     </html>"""
     
         msg.attach(MIMEText(html_content, "html"))      
         image_attachment = MIMEImage(img_with_link.read())
