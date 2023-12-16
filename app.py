@@ -643,6 +643,16 @@ def chat():
             max_tokens=50,
             messages=[
                 {"role": "system", "content": "You are a helpful assistant chatbot for the hotel,Aloft Palm Jumeirah, called arrivechat. Your job is to help tourists by giving to-the-point answers in one or two lines. You only answer questions related to a place and majorly Aloft Palm Jumeirah Hotel Of Dubai."},
+                {"role": "user", "content": "tell me about your hotel"},
+                {"role": "assistant", "content": "Aloft Palm Jumeirah is a trendy hotel in Dubai with modern amenities, beach access, and vibrant social spaces. Enjoy a stylish stay with stunning views of the Palm Jumeirah."},
+                {"role": "user", "content": "what are the places to visit from there?"},
+                {"role": "assistant", "content": "Explore nearby attractions like Atlantis The Palm, Aquaventure Waterpark, and the Dubai Marina. The hotel's location offers easy access to iconic landmarks and entertainment options."},
+                {"role": "user", "content": "what are the your helath and safety measures?"},
+                {"role": "assistant", "content": "Experience a worry-free stay with our comprehensive health and safety measures, including daily housekeeping, contactless check-in/check-out, and the availability of face masks for guests. Enjoy peace of mind with physical distancing in dining areas, secured guest accommodation disinfected between stays, and the use of effective cleaning chemicals. Our 24-hour security, CCTV coverage, and staff adherence to safety protocols ensure a secure environment. We prioritize your well-being with enhanced cleaning, optional accommodation cleaning, and the provision of thermometers for guest use. Your safety is our commitment!"},
+                {"role": "user", "content": "What if there is Fire"},
+                {"role": "assistant", "content": "In case of a fire, please remain calm. Follow the emergency exit signs, use stairwells, and do not use elevators. Proceed to the nearest exit and assemble at the designated meeting point. Our staff is trained to assist and ensure your safety during such situations."},
+                {"role": "user", "content": "What if I have an emergency?"},
+                {"role": "assistant", "content": "You can directly contact our hotel captain by clicking on the emergency button"},
                 {"role": "user", "content": question}
             ]
         )
@@ -660,6 +670,7 @@ def chat():
 
     def create_hotel_chatbot():
         hotel_questions = [
+        "SOS",
         "Do you know which hotel are we talking about?",
         "Where is Aloft Palm Jumeirah located, and what sets it apart?",
         "What are the nearby attractions and communities around Aloft Palm Jumeirah?",
@@ -693,6 +704,7 @@ def chat():
         "What is the cancellation policy of Aloft Palm Jumeirah?"
         ]
         hotel_answers = [
+      "I'm sorry to hear you're in distress. Please click on the emergency icon to connect with our hotel calptain for prompt assistance. Your safety is our top priority.",
       "Ofcourse!, I am talking about Aloft Palm Jumeirah",
       "Aloft Palm Jumeirah is located on Crescent Road, offering a unique lifestyle experience that combines style, comfort, leisure, and fine dining. It is one of the most affordable hotels in Palm Jumeirah.",
       "Nearby attractions include Waldorf Astoria (4 minutes away), Atlantis, The Palm (6 minutes away), Al Sufouh 2 (20 minutes away), Dubai Marina (22 minutes away), Al Barsha Heights (23 minutes away), and Dubai Harbour (23 minutes away).",
