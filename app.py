@@ -638,11 +638,12 @@ def chat():
 
     def query_gpt4_api(question, dest_language='en'):
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo-1106",
+            model="gpt-3.5-turbo-0125",
             response_format={"type": "text"},
-            max_tokens=100,
+            temperature = 0.8,
+            max_tokens=250,
             messages=[
-                {"role": "system", "content": "You are a helpful assistant chatbot for the hotel,Aloft Palm Jumeirah, called arrivechat. Your job is to help tourists by giving to-the-point answers in one or two lines. You only answer questions related to a place and majorly Aloft Palm Jumeirah Hotel Of Dubai."},
+                {"role": "system", "content": "You are a friendly helpful assistant, called arrivechat, for Aloft Palm Jumeirah. Your job is to help tourists by giving them precise and comprehensive answers within 250 tokens. You only answer questions related to a place and majorly Aloft Palm Jumeirah Hotel Of Dubai. Your responses are tailored to be within 250 tokens, ensuring precision, friendliness, and relevance to the guest's queries."},
                 {"role": "user", "content": "tell me about your hotel"},
                 {"role": "assistant", "content": "Aloft Palm Jumeirah is a trendy hotel in Dubai with modern amenities, beach access, and vibrant social spaces. Enjoy a stylish stay with stunning views of the Palm Jumeirah."},
                 {"role": "user", "content": "what are the places to visit from there?"},
@@ -654,7 +655,45 @@ def chat():
                 {"role": "user", "content": "What if I have an emergency like a heart attack?"},
                 {"role": "assistant", "content": "You can directly contact our hotel captain by clicking on the SOS button.You will be provided with all means of medical assistance. "},
                 {"role": "user", "content": "I have clicked on the SOS icon"},
-                {"role": "assistant", "content": "Our captain has been notified , you will be provided with all means of assitance in no time."},
+                {"role": "assistant", "content": "Our captain has been notified , you will be provided with all means of assitance in no time."},                
+                {"role": "user", "content": "What amenities are present in the rooms at Aloft Palm Jumeirah?"}, 
+                {"role": "assistant", "content": "Each room at Aloft Palm Jumeirah is equipped with modern amenities including a flat-screen TV, mini-fridge, coffee maker, and luxurious bedding for a comfortable stay."},                
+                {"role": "user", "content": "Is a heater available in the rooms during colder months?"}, 
+                {"role": "assistant", "content": "Yes, the rooms at Aloft Palm Jumeirah are equipped with individual climate control, including heaters for colder months, ensuring guests' comfort year-round."},                
+                {"role": "user", "content": "Is the swimming pool at Aloft Palm Jumeirah accessible 24/7?"}, 
+                {"role": "assistant", "content": "Yes, the outdoor swimming pool at Aloft Palm Jumeirah is accessible to guests 24 hours a day, offering a refreshing escape at any time."},                
+                {"role": "user", "content": "Is there an additional charge for using the swimming pool?"}, 
+                {"role": "assistant", "content": "No, access to the swimming pool at Aloft Palm Jumeirah is complimentary for all guests staying at the hotel."},                
+                {"role": "user", "content": "Do guests need to pay for room service at Aloft Palm Jumeirah?"}, 
+                {"role": "assistant", "content": "Room service at Aloft Palm Jumeirah is available for an additional fee, allowing guests to enjoy delicious meals and snacks in the comfort of their rooms."},                
+                {"role": "user", "content": "Where can guests find the WiFi password during their stay?"}, 
+                {"role": "assistant", "content": "The WiFi password is provided upon check-in at Aloft Palm Jumeirah. Guests can also inquire about the password at the front desk for seamless connectivity throughout their stay."},                
+                {"role": "user", "content": "What are the available dining options for guests at Aloft Palm Jumeirah?"}, 
+                {"role": "assistant", "content": "Aloft Palm Jumeirah offers a diverse range of dining options, including East & Seaboard for international cuisine, Luchador for Mexican delights, W XYZ Bar for refreshing cocktails, and Aloft Aloha Beach for beachside dining experiences."},                
+                {"role": "user", "content": "Are there fitness facilities available for guests at Aloft Palm Jumeirah?"}, 
+                {"role": "assistant", "content": "Yes, guests can maintain their fitness routines during their stay at Aloft Palm Jumeirah, as the hotel provides a well-equipped fitness center with modern exercise equipment."},                
+                {"role": "user", "content": "Does Aloft Palm Jumeirah offer laundry services for guests?"}, 
+                {"role": "assistant", "content": "Yes, Aloft Palm Jumeirah provides laundry services for guests, ensuring their clothes are cleaned and refreshed during their stay for added convenience."},                
+                {"role": "user", "content": "Are there business facilities available for corporate travelers at Aloft Palm Jumeirah?"}, 
+                {"role": "assistant", "content": "Yes, Aloft Palm Jumeirah offers business facilities including meeting rooms and a business center, catering to the needs of corporate travelers seeking a productive stay."},                
+                {"role": "user", "content": "Does Aloft Palm Jumeirah offer airport shuttle services for guests?"}, 
+                {"role": "assistant", "content": "Yes, Aloft Palm Jumeirah provides airport shuttle services for guests, offering convenient transportation to and from Dubai International Airport for a hassle-free arrival and departure experience."},                
+                {"role": "user", "content": "Are there any special promotions or packages available for guests at Aloft Palm Jumeirah?"}, 
+                {"role": "assistant", "content": "Yes, Aloft Palm Jumeirah frequently offers special promotions and packages, including discounted rates, complimentary upgrades, and added perks to enhance guests' stay experiences. Guests can inquire about the latest offers when making reservations."},
+                {"role": "user", "content": "Are there any fees for using the hotel's spa facilities or booking spa treatments at Aloft Palm Jumeirah?"}, 
+                {"role": "assistant", "content": "Guests may incur fees for accessing the spa facilities or booking spa treatments at Aloft Palm Jumeirah. Prices for spa services vary depending on the treatment and duration. Guests can inquire about spa fees and packages for a relaxing experience."},                
+                {"role": "user", "content": "What are the charges for accessing premium Wi-Fi services at Aloft Palm Jumeirah?"}, 
+                {"role": "assistant", "content": "While basic Wi-Fi may be complimentary, Aloft Palm Jumeirah may offer premium Wi-Fi services at an additional cost for guests seeking higher speeds or enhanced connectivity. Guests can inquire about premium Wi-Fi options and associated charges during their stay."},                
+                {"role": "user", "content": "What type of breakfast options are available for guests at Aloft Palm Jumeirah?"}, 
+                {"role": "assistant", "content": "Aloft Palm Jumeirah offers a variety of breakfast options, including continental, buffet-style, and à la carte selections. Guests can choose from a range of delicious dishes to start their day."},                
+                {"role": "user", "content": "Does Aloft Palm Jumeirah provide room service, and what are the available hours?"}, 
+                {"role": "assistant", "content": "Yes, Aloft Palm Jumeirah offers room service for guests who prefer to dine in the comfort of their rooms. Guests can enjoy a selection of meals and snacks during designated hours, typically from morning until late evening."},                
+                {"role": "user", "content": "Are there any restrictions on bringing outside food or beverages into the hotel rooms at Aloft Palm Jumeirah?"}, 
+                {"role": "assistant", "content": "Aloft Palm Jumeirah may have policies regarding outside food and beverages brought into the hotel rooms. Guests are advised to check with the hotel staff regarding any restrictions or guidelines before bringing outside items."},                
+                {"role": "user", "content": "What recreational facilities does Aloft Palm Jumeirah offer for guests to enjoy during their stay?"}, 
+                {"role": "assistant", "content": "Aloft Palm Jumeirah provides various recreational facilities for guests, such as an outdoor swimming pool, fitness center, and access to nearby beaches. Guests can relax and unwind while enjoying these amenities."},                
+                {"role": "user", "content": "Does Aloft Palm Jumeirah offer any special amenities or services for guests celebrating special occasions, such as birthdays or anniversaries?"}, 
+                {"role": "assistant", "content": "Aloft Palm Jumeirah may offer special amenities or services for guests celebrating special occasions, such as complimentary upgrades, personalized amenities, or special dining arrangements. Guests can inquire about these options when making reservations or during their stay."},
                 {"role": "user", "content": question}
             ]
         )
@@ -761,9 +800,9 @@ def chat():
             question_vectors = vectorizer.fit_transform(question_db)
             cosine_similarities = cosine_similarity(question_vectors[-1], question_vectors[:-1]).flatten()
             most_similar_index = cosine_similarities.argmax()
-            similarity_threshold = 0.5
+            similarity_threshold = 0.8
 
-            if cosine_similarities[most_similar_index] < similarity_threshold:
+             if most_similar_index < len(answer_db) and cosine_similarities[most_similar_index] >= similarity_threshold:
                 response = query_gpt4_api(user_input_translated, dest_language=dest_language)
             else:
                 response = answer_db[most_similar_index]
