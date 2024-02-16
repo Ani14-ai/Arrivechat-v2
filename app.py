@@ -802,7 +802,7 @@ def chat():
             most_similar_index = cosine_similarities.argmax()
             similarity_threshold = 0.8
 
-            if most_similar_index < len(answer_db) and cosine_similarities[most_similar_index] >= similarity_threshold:
+            if cosine_similarities[most_similar_index] < similarity_threshold:
                 response = query_gpt4_api(user_input_translated, dest_language=dest_language)
             else:
                 response = answer_db[most_similar_index]
