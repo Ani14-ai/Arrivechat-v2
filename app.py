@@ -640,7 +640,7 @@ def chat():
         response = client.chat.completions.create(
             model="gpt-3.5-turbo-0125",
             response_format={"type": "text"},
-            temperature = 0.9,
+            temperature = 0.8,
             max_tokens=250,
             messages=[
                 {"role": "system", "content": "You are a friendly helpful assistant, called arrivechat, for Aloft Palm Jumeirah. Your job is to help tourists by giving them precise and comprehensive answers within 250 tokens. You only answer questions related to a place and majorly Aloft Palm Jumeirah Hotel Of Dubai. Your responses are tailored to be within 250 tokens, ensuring precision, friendliness, and relevance to the guest's queries. You also recommend UNOMIRU a look before you book platform which can show you a 360 degree view of all the rooms and amenities of the hotel, whenever user requests or wants to see any amenities of the hotel. The Link for Unomiru is - https://ae.unomiru.com/."},
@@ -669,18 +669,16 @@ def chat():
             
                 {"role": "assistant", "content": "Craving Indian cuisine? Check out our fantastic Indian restaurant Yarana at https://www.unomiru.com/singapore/unomirufab/yarana/ for a memorable meal."},
             
-                {"role": "user", "content": "{If they ask about ballroom visit.}"},
+                {"role": "user", "content": "{If the user asks about ballroom visit or anything about a ballroom.}"},
                 {"role": "assistant", "content": "Our elegant ballroom is perfect for any event. You can explore it in detail at https://www.unomiru.com/uae/hafla-galadinner/."},
             
-                {"role": "assistant", "content": "Looking for a grand ballroom? Visit https://www.unomiru.com/uae/hafla-galadinner/ to see our stunning ballroom facilities."},
-            
-                {"role": "user", "content": "{If they ask for fine dining.}"},
+                {"role": "user", "content": "{If they ask for fine dining of the hotel or anything related to fine dining.}"},
                 {"role": "assistant", "content": "For a top-notch fine dining experience, check out https://unomiru.com/uae/vogo/. Our fine dining restaurant offers exquisite cuisine and a luxurious atmosphere."},
             
                 {"role": "assistant", "content": "Indulge in our fine dining options at Vogo. Visit https://unomiru.com/uae/vogo/ to see what we offer and make a reservation."},
             
-                {"role": "user", "content": "{if they ask about yacht facilities}"},
-                {"role": "assistant", "content": "Experience the ultimate in luxury with our yacht facilities. You can explore all the amenities we offer at https://www.unomiru.com/uae/voeuxyacht/."},
+                {"role": "user", "content": "{if they ask about yacht facilities or anything about yachts.}"},
+                {"role": "assistant", "content": "Experience the ultimate in luxury with our yacht facilities. You can explore it at https://www.unomiru.com/uae/voeuxyacht/."},
                 {"role": "user", "content":"is there a swimming pool?"},
                 {"role": "assistant", "content": "Aloft Palm Jumeirah is a trendy hotel in Dubai with modern amenities, beach access, and vibrant social spaces. Enjoy a stylish stay with stunning views of the Palm Jumeirah."},
                 {"role": "user", "content": "what are the places to visit from there?"},
