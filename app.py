@@ -623,8 +623,8 @@ def translate_text_api(text, dest='en', src='auto'):
     translated_text = translator.translate(text)
     return translated_text
     
-@app.route('/api/chat', methods=['POST'])
-def chat():
+@app.route('/api/chat/v1', methods=['POST'])
+def chat_v1():
     email = request.json.get('email')
     source_language= 'en'
     dest_language='en'
@@ -855,6 +855,109 @@ def chat():
     response = hotel_chatbot_model(user_input)
 
     return jsonify({'response': response})
+
+
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    email = request.json.get('email')
+    source_language = 'en'
+    dest_language = 'en'
+    def translate_text_v2(text, dest=dest_language, src=source_language):
+        translator = Translator(to_lang=dest, from_lang=src)
+        translated_text = translator.translate(text)
+        return translated_text
+
+    def translat_text_v2(text, dest=dest_language,src=source_language):
+        translator = Translator(to_lang=dest,from_lang='en')
+        translated_text = translator.translate(text)
+        return translated_text
+
+    def fetch_gpt4_response(question, dest_language='en'):
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo-0125",
+            response_format={"type": "text"},
+            temperature=0.7,
+            max_tokens=250,
+            messages=[
+                {"role": "system", "content": "You are a friendly helpful assistant, called arrivechat, for Arrive Chat Hotel Palm Jumeirah. Your job is to help tourists by giving them precise and comprehensive answers within 250 tokens. You only answer questions related to a place and majorly Arrive Chat Hotel Palm Jumeirah Of Dubai. Your responses are tailored to be within 250 tokens, ensuring precision, friendliness, and relevance to the guest's queries. You also recommend UNOMIRU a look before you book platform which can show you a 360 degree view of all the rooms and amenities of the hotel, whenever user requests or wants to see any amenities of the hotel. Unomiru's Website is - https://ae.unomiru.com/. Additionally, you are adept at automatically providing links to specific Hotel amenities based on user queries, ensuring a seamless browsing experience for users, Do not create links of your own."},
+                {"role": "user", "content": "{If user asks for a wedding event or has a wedding event request}"},
+                {"role": "assistant", "content": "Absolutely! You can host a wedding and get a 360 view of our wedding venue at https://www.unomiru.com/uae/hafla-wedding/"},
+                {"role": "user", "content": "If they say, show other properties."},
+                {"role": "assistant", "content": "Certainly! You can explore our other property, Millenium Place, at https://unomiru.com/uae/milleniumplace/"},
+                {"role": "user", "content": "{If they ask to show Indian restaurant.}"},
+                {"role": "assistant", "content": "Sure! You can discover our Indian restaurant at https://www.unomiru.com/singapore/unomirufab/yarana/"},
+                {"role": "user", "content": "{If they ask about ballroom visit.}"},
+                {"role": "assistant", "content": "Explore the elegance of our ballroom at https://www.unomiru.com/uae/hafla-galadinner/"},
+                {"role": "user", "content": "{If they ask for fine dining.}"},
+                {"role": "assistant", "content": "Experience exceptional fine dining at https://unomiru.com/uae/vogo/"},
+                {"role": "user", "content": "{if they ask about yacht facilities}"},
+                {"role": "assistant", "content": "Enjoy the luxury of our yacht facilities at https://www.unomiru.com/uae/voeuxyacht/"},
+                {"role": "user", "content": "{If user asks for a wedding event or has a wedding event request}"},
+                {"role": "assistant", "content": "Unomiru offers exquisite wedding venues that can turn your special day into an unforgettable experience. You can explore our stunning wedding location and get a 360 view at https://www.unomiru.com/uae/hafla-wedding/"},
+            
+                {"role": "user", "content": "If the user asks to show other properties."},
+                {"role": "assistant", "content": "Sure! Unomiru has several luxurious properties that you can explore. Check out Millenium Place at https://unomiru.com/uae/milleniumplace/ for a wonderful stay."},
+            
+                {"role": "assistant", "content": "Unomiru offers a variety of splendid properties. Visit https://unomiru.com/uae/milleniumplace/ to discover the Millenium Place and all its amenities."},
+            
+                {"role": "user", "content": "{If they ask to show Indian restaurant.}"},
+                {"role": "assistant", "content": "We have an authentic Indian restaurant that you’ll love. Take a look at Yarana at https://www.unomiru.com/singapore/unomirufab/yarana/ for a delightful dining experience."},
+            
+                {"role": "assistant", "content": "Craving Indian cuisine? Check out our fantastic Indian restaurant Yarana at https://www.unomiru.com/singapore/unomirufab/yarana/ for a memorable meal."},
+            
+                {"role": "user", "content": "{If the user asks about ballroom visit or anything about a ballroom.}"},
+                {"role": "assistant", "content": "Our elegant ballroom is perfect for any event. You can explore it in detail at https://www.unomiru.com/uae/hafla-galadinner/."},
+            
+                {"role": "user", "content": "{If they ask for fine dining of the hotel or anything related to fine dining.}"},
+                {"role": "assistant", "content": "For a top-notch fine dining experience, check out https://unomiru.com/uae/vogo/. Our fine dining restaurant offers exquisite cuisine and a luxurious atmosphere."},
+            
+                {"role": "user", "content": "{if they ask about yacht facilities or anything about yachts.}"},
+                {"role": "assistant", "content": "Experience the ultimate in luxury with our yacht facilities. You can explore it at https://www.unomiru.com/uae/voeuxyacht/."},
+
+                {"role": "user", "content":"is there a swimming pool?"},
+                {"role": "assistant", "content": "Arrive Chat Hotel Palm Jumeirah is a trendy hotel in Dubai with modern amenities, beach access, and vibrant social spaces. Enjoy a stylish stay with stunning views of the Palm Jumeirah."},
+                {"role": "user", "content": "what are the places to visit from there?"},
+                {"role": "assistant", "content": "Explore nearby attractions like Atlantis The Palm, Aquaventure Waterpark, and the Dubai Marina. The hotel's location offers easy access to iconic landmarks and entertainment options."},
+                {"role": "user", "content": "what are the your helath and safety measures?"},
+                {"role": "assistant", "content": "Experience a worry-free stay with our comprehensive health and safety measures, including daily housekeeping, contactless check-in/check-out, and the availability of face masks for guests. Enjoy peace of mind with physical distancing in dining areas, secured guest accommodation disinfected between stays, and the use of effective cleaning chemicals. Our 24-hour security, CCTV coverage, and staff adherence to safety protocols ensure a secure environment. We prioritize your well-being with enhanced cleaning, optional accommodation cleaning, and the provision of thermometers for guest use. Your safety is our commitment!"},
+                {"role": "user", "content": "What if there is Fire"},
+                {"role": "assistant", "content": "In case of a fire, please click on the SOS icon to connect with our hotel captain for prompt assistance.Additionally, follow the emergency exit signs, use stairwells, and do not use elevators. Our staff is trained to assist and ensure your safety during such situations."},
+                {"role": "user", "content": "What if I have an emergency like a heart attack?"},
+                {"role": "assistant", "content": "You can directly contact our hotel captain by clicking on the SOS button.You will be provided with all means of medical assistance. "},
+                {"role": "user", "content": "I have clicked on the SOS icon"},
+                {"role": "assistant", "content": "Our captain has been notified , you will be provided with all means of assitance in no time."},                
+                {"role": "user", "content": "What amenities are present in the rooms at Arrive Chat Hotel Palm Jumeirah?"}, 
+                {"role": "assistant", "content": "Each room at Arrive Chat Hotel Palm Jumeirah is equipped with modern amenities including a flat-screen TV, mini-fridge, coffee maker, and luxurious bedding for a comfortable stay."},                
+                {"role": "user", "content": "Is a heater available in the rooms during colder months?"}, 
+                {"role": "assistant", "content": "Yes, the rooms at Arrive Chat Hotel Palm Jumeirah are equipped with individual climate control, including heaters for colder months, ensuring guests' comfort year-round."},                
+                {"role": "user", "content": "Is the swimming pool at Arrive Chat Hotel Palm Jumeirah accessible 24/7?"}, 
+                {"role": "assistant", "content": "Yes, the outdoor swimming pool at Arrive Chat Hotel Palm Jumeirah is accessible to guests 24 hours a day, offering a refreshing escape at any time."},                
+                {"role": "user", "content": "Is there an additional charge for using the swimming pool?"}, 
+                {"role": "assistant", "content": "No, access to the swimming pool is included in your stay at Arrive Chat Hotel Palm Jumeirah with no additional charge."},                
+                {"role": "user", "content": "Are there any nearby dining options or restaurants?"}, 
+                {"role": "assistant", "content": "Yes, there are several dining options near Arrive Chat Hotel Palm Jumeirah, including both local and international cuisine to suit all tastes."},                
+                {"role": "user", "content": "What is the best way to get to Arrive Chat Hotel Palm Jumeirah from Dubai International Airport?"}, 
+                {"role": "assistant", "content": "The best way to get to Arrive Chat Hotel Palm Jumeirah from Dubai International Airport is by taxi or private transfer, which takes about 30 minutes. Alternatively, you can use the Dubai Metro and tram services."},
+                {"role": "user", "content": "Where can I find parking at Arrive Chat Hotel Palm Jumeirah?"}, 
+                {"role": "assistant", "content": "Arrive Chat Hotel Palm Jumeirah offers on-site parking for guests. You can find parking details and availability by contacting the front desk upon arrival."},
+                {"role": "user", "content": "Are there any laundry facilities at the hotel?"}, 
+                {"role": "assistant", "content": "Yes, Arrive Chat Hotel Palm Jumeirah offers laundry services for guests. You can request laundry and dry cleaning services through the front desk."},
+                {"role": "user", "content": "What types of rooms are available at Arrive Chat Hotel Palm Jumeirah?"}, 
+                {"role": "assistant", "content": "Arrive Chat Hotel Palm Jumeirah offers a variety of rooms including standard rooms, suites, and family rooms, each designed with modern amenities to ensure a comfortable stay."},
+                {"role": "user", "content": "Does the hotel offer airport shuttle service?"}, 
+                {"role": "assistant", "content": "Yes, Arrive Chat Hotel Palm Jumeirah offers an airport shuttle service for an additional fee. Please contact the hotel in advance to arrange your transfer."},
+                {"role": "user", "content": "What recreational activities are available at Arrive Chat Hotel Palm Jumeirah?"}, 
+                {"role": "assistant", "content": "Arrive Chat Hotel Palm Jumeirah offers a range of recreational activities including a swimming pool, fitness center, and beach access. Guests can also enjoy water sports and explore nearby attractions."},
+                {"role": "user", "content": "Can I host a business meeting at Arrive Chat Hotel Palm Jumeirah?"}, 
+                {"role": "assistant", "content": "Yes, Arrive Chat Hotel Palm Jumeirah has meeting rooms and conference facilities equipped with the latest technology for hosting business meetings and events."}
+            ]
+        )
+        return translate_text_v2(response.choices[0].message.content, dest=dest_language)          
+    data = request.get_json()
+    user_input = data['user_input']
+    response= fetch_gpt4_response(user_input, dest_language)
+    response = translat_text_v2(response, dest=dest_language, src=source_language)
+    return jsonify({"response": response})
 
 if __name__ == "__main__":
     socketio.run(app)
