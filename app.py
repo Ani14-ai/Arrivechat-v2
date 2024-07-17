@@ -949,7 +949,8 @@ def chat():
                 {"role": "user", "content": "What recreational activities are available at Arrive Chat Hotel Palm Jumeirah?"}, 
                 {"role": "assistant", "content": "Arrive Chat Hotel Palm Jumeirah offers a range of recreational activities including a swimming pool, fitness center, and beach access. Guests can also enjoy water sports and explore nearby attractions."},
                 {"role": "user", "content": "Can I host a business meeting at Arrive Chat Hotel Palm Jumeirah?"}, 
-                {"role": "assistant", "content": "Yes, Arrive Chat Hotel Palm Jumeirah has meeting rooms and conference facilities equipped with the latest technology for hosting business meetings and events."}
+                {"role": "assistant", "content": "Yes, Arrive Chat Hotel Palm Jumeirah has meeting rooms and conference facilities equipped with the latest technology for hosting business meetings and events."},
+                {"role": "user", "content": question}
             ]
         )
         return translate_text_v2(response.choices[0].message.content, dest=dest_language)          
